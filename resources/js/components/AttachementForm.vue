@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import SignaturePad from 'signature_pad'
 import jsPDF from 'jspdf'
@@ -55,6 +55,9 @@ const form = useForm({
 // State management
 const errors = ref<string[]>([])
 const success = ref('')
+
+// Computed properties
+const currentDate = computed(() => format(new Date(), 'yyyy-MM-dd'))
 
 // Geolocation data
 const geolocationData = ref({
@@ -122,6 +125,10 @@ const clearSignature = (type: 'entreprise' | 'client') => {
   } else if (type === 'client' && signatureClientPad) {
     signatureClientPad.clear()
   }
+}
+
+const generatePDFAndPrint = () => {
+  window.print()
 }
 
 const generatePDF = async (): Promise<Blob> => {
@@ -404,416 +411,407 @@ const resetForm = () => {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto p-6">
-    <h1 class="text-3xl font-bold text-gray-900 mb-8">Attachement de Travaux</h1>
-    
+  <div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b sticky top-0 z-10">
+      <div class="max-w-7xl mx-auto px-4 py-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <div>
+              <h1 class="text-xl font-bold text-gray-900">Attachement de Travaux</h1>
+              <p class="text-sm text-gray-500">N° {{ form.numero_dossier || '3329' }}</p>
+            </div>
+          </div>
+          <div class="flex space-x-2">
+            <button
+              @click="generatePDFAndPrint"
+              class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Imprimer/PDF
+            </button>
+            <button 
+              @click="submitForm"
+              :disabled="form.processing"
+              class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400"
+            >
+              <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <span v-if="form.processing">Traitement...</span>
+              <span v-else>Sauvegarder</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Messages -->
-    <div v-if="success" class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-      {{ success }}
+    <div v-if="success" class="max-w-7xl mx-auto px-4 py-4">
+      <div class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+        {{ success }}
+      </div>
     </div>
     
-    <div v-if="errors.length > 0" class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-      <ul class="list-disc list-inside">
-        <li v-for="error in errors" :key="error">{{ error }}</li>
-      </ul>
+    <div v-if="errors.length > 0" class="max-w-7xl mx-auto px-4 py-4">
+      <div class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+        <ul class="list-disc list-inside">
+          <li v-for="error in errors" :key="error">{{ error }}</li>
+        </ul>
+      </div>
     </div>
-    
-    <form ref="formRef" @submit.prevent="submitForm" class="space-y-8">
-      <!-- Informations client -->
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Informations Client</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Nom du client <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="form.client_nom"
-              type="text"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Email du client <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="form.client_email"
-              type="email"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Adresse de facturation <span class="text-red-500">*</span>
-            </label>
-            <textarea
-              v-model="form.client_adresse_facturation"
-              rows="3"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              N° dossier
-            </label>
-            <input
-              v-model="form.numero_dossier"
-              type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <div class="bg-white rounded-lg shadow-lg" ref="printRef">
+        <!-- Company Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-lg">
+          <div class="flex justify-between items-start">
+            <div>
+              <h2 class="text-2xl font-bold">LESOT</h2>
+              <p class="text-blue-100">Saint-Laurent-Blangy</p>
+              <p class="text-blue-100">Tél. 03 21 215 200</p>
+            </div>
+            <div class="text-right">
+              <h3 class="text-xl font-semibold">ATTACHEMENT DE TRAVAUX</h3>
+              <p class="text-blue-100">N° {{ form.numero_dossier || '3329' }}</p>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Détails intervention -->
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Détails de l'intervention</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Lieu de l'intervention <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="form.lieu_intervention"
-              type="text"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+
+        <form ref="formRef" @submit.prevent="submitForm" class="p-6 space-y-6">
+          <!-- Client Information -->
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <div class="flex items-center space-x-2 text-lg font-semibold text-gray-800">
+                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span>CLIENT</span>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Nom du client
+                  </label>
+                  <input
+                    v-model="form.client_nom"
+                    type="text"
+                    required
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Email du client
+                  </label>
+                  <input
+                    v-model="form.client_email"
+                    type="email"
+                    required
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Adresse de facturation
+                  </label>
+                  <textarea
+                    v-model="form.client_adresse_facturation"
+                    rows="3"
+                    required
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Date
+                  </label>
+                  <input
+                    v-model="form.date_intervention"
+                    type="date"
+                    required
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    N° dossier
+                  </label>
+                  <input
+                    v-model="form.numero_dossier"
+                    type="text"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Date <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="form.date_intervention"
-              type="date"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Désignation des travaux <span class="text-red-500">*</span>
-            </label>
-            <textarea
-              v-model="form.designation_travaux"
-              rows="3"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Fournitures et travaux -->
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Fournitures et travaux exécutés</h3>
-        
-        <div class="space-y-3">
-          <div
-            v-for="(ligne, index) in form.fournitures_travaux"
-            :key="index"
-            class="bg-gray-50 p-4 rounded-md border border-gray-200"
-          >
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <div class="md:col-span-5">
+
+          <!-- Intervention Details -->
+          <div class="space-y-4">
+            <div class="flex items-center space-x-2 text-lg font-semibold text-gray-800">
+              <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>INTERVENTION</span>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Lieu de l'intervention
+                </label>
                 <input
-                  v-model="ligne.designation"
+                  v-model="form.lieu_intervention"
                   type="text"
-                  placeholder="Désignation"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              
-              <div class="md:col-span-2">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  OUVRAGE
+                </label>
                 <input
-                  v-model="ligne.quantite"
-                  type="number"
-                  step="0.01"
-                  placeholder="Quantité"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              <div class="md:col-span-4">
-                <input
-                  v-model="ligne.observations"
+                  v-model="form.designation_travaux"
                   type="text"
-                  placeholder="Observations"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              
-              <div class="md:col-span-1 flex items-center">
-                <button
-                  v-if="form.fournitures_travaux.length > 1"
-                  type="button"
-                  @click="supprimerLigne(index)"
-                  class="w-full px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-                >
-                  ×
-                </button>
+            </div>
+          </div>
+
+          <!-- Work Items Table -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold text-gray-800">
+                DÉSIGNATION détaillée des FOURNITURES de TRAVAUX EXÉCUTÉS
+              </h3>
+              <button
+                type="button"
+                @click="ajouterLigne"
+                class="flex items-center px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              >
+                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Ajouter
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr class="bg-gray-50">
+                    <th class="border border-gray-300 px-4 py-3 text-left font-semibold">
+                      Désignation
+                    </th>
+                    <th class="border border-gray-300 px-4 py-3 text-center font-semibold w-32">
+                      Quantités
+                    </th>
+                    <th class="border border-gray-300 px-4 py-3 text-left font-semibold w-48">
+                      Observations
+                    </th>
+                    <th class="border border-gray-300 px-4 py-3 text-center font-semibold w-16">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(ligne, index) in form.fournitures_travaux" :key="index" class="hover:bg-gray-50">
+                    <td class="border border-gray-300 px-4 py-3">
+                      <textarea
+                        v-model="ligne.designation"
+                        rows="2"
+                        required
+                        class="w-full border-none resize-none focus:ring-2 focus:ring-blue-500 rounded"
+                        placeholder="Description des travaux..."
+                      ></textarea>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input
+                        v-model="ligne.quantite"
+                        type="text"
+                        required
+                        class="w-full border-none text-center focus:ring-2 focus:ring-blue-500 rounded"
+                        placeholder="Qté"
+                      />
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <textarea
+                        v-model="ligne.observations"
+                        rows="2"
+                        class="w-full border-none resize-none focus:ring-2 focus:ring-blue-500 rounded"
+                        placeholder="Observations..."
+                      ></textarea>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3 text-center">
+                      <button
+                        v-if="form.fournitures_travaux.length > 1"
+                        type="button"
+                        @click="supprimerLigne(index)"
+                        class="text-red-600 hover:text-red-800"
+                      >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Total Time -->
+          <div class="space-y-2">
+            <label class="block text-lg font-semibold text-gray-800">
+              TEMPS TOTAL PASSÉ :
+            </label>
+            <input
+              v-model="form.temps_total_passe"
+              type="text"
+              required
+              class="w-64 border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ex: 8h30"
+            />
+          </div>
+
+          <!-- Signatures -->
+          <div class="grid md:grid-cols-2 gap-6 pt-6 border-t">
+            <div class="space-y-4">
+              <h4 class="font-semibold text-gray-800">Pour l'Entreprise</h4>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm text-gray-600 mb-1">Date</label>
+                  <input
+                    type="date"
+                    :value="currentDate"
+                    readonly
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm text-gray-600 mb-1">Nom</label>
+                  <input
+                    type="text"
+                    placeholder="Nom du représentant"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Signature Entreprise <span class="text-red-500">*</span>
+                  </label>
+                  <div class="border-2 border-dashed border-gray-300 rounded-md">
+                    <canvas
+                      ref="signatureEntrepriseCanvas"
+                      width="400"
+                      height="120"
+                      class="w-full"
+                    ></canvas>
+                  </div>
+                  <button
+                    type="button"
+                    @click="clearSignature('entreprise')"
+                    class="mt-2 px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                  >
+                    Effacer
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <h4 class="font-semibold text-gray-800">Pour le client</h4>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm text-gray-600 mb-1">Date</label>
+                  <input
+                    type="date"
+                    :value="currentDate"
+                    readonly
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm text-gray-600 mb-1">Nom</label>
+                  <input
+                    v-model="form.client_nom"
+                    type="text"
+                    readonly
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Signature Client <span class="text-red-500">*</span>
+                  </label>
+                  <div class="border-2 border-dashed border-gray-300 rounded-md">
+                    <canvas
+                      ref="signatureClientCanvas"
+                      width="400"
+                      height="120"
+                      class="w-full"
+                    ></canvas>
+                  </div>
+                  <button
+                    type="button"
+                    @click="clearSignature('client')"
+                    class="mt-2 px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                  >
+                    Effacer
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <button
-          type="button"
-          @click="ajouterLigne"
-          class="mt-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-        >
-          Ajouter une ligne
-        </button>
+        </form>
       </div>
-      
-      <!-- Temps total -->
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Temps total passé (en heures) <span class="text-red-500">*</span>
-        </label>
-        <input
-          v-model="form.temps_total_passe"
-          type="number"
-          min="0.5"
-          step="0.5"
-          required
-          class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      
-      <!-- Signatures -->
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Signatures</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Signature Entreprise <span class="text-red-500">*</span>
-            </label>
-            <div class="border-2 border-gray-300 rounded-md">
-              <canvas
-                ref="signatureEntrepriseCanvas"
-                width="400"
-                height="200"
-                class="w-full"
-              ></canvas>
-            </div>
-            <button
-              type="button"
-              @click="clearSignature('entreprise')"
-              class="mt-2 px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-            >
-              Effacer
-            </button>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Signature Client <span class="text-red-500">*</span>
-            </label>
-            <div class="border-2 border-gray-300 rounded-md">
-              <canvas
-                ref="signatureClientCanvas"
-                width="400"
-                height="200"
-                class="w-full"
-              ></canvas>
-            </div>
-            <button
-              type="button"
-              @click="clearSignature('client')"
-              class="mt-2 px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-            >
-              Effacer
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Boutons de soumission -->
-      <div class="flex justify-center gap-4">
-        <button
-          type="button"
-          @click="emit('cancel')"
-          class="px-8 py-3 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors"
-        >
-          Annuler
-        </button>
-        <button
-          type="submit"
-          :disabled="form.processing"
-          class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          <span v-if="form.processing">Traitement en cours...</span>
-          <span v-else>Valider et Envoyer</span>
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.attachement-form {
-    max-width: 800px;
-    margin: 0 auto;
+/* Print styles */
+@media print {
+  .bg-white {
+    background: white !important;
+  }
+  
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+  
+  .sticky {
+    position: static !important;
+  }
+  
+  .bg-gray-50 {
+    background: white !important;
+  }
+  
+  /* Hide header and buttons when printing */
+  .bg-white.shadow-sm.border-b,
+  .flex.space-x-2 {
+    display: none !important;
+  }
 }
 
-.form-section {
-    background: #f8f9fa;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    border: 1px solid #dee2e6;
+/* Custom canvas styles */
+canvas {
+  background: white;
+  touch-action: none;
 }
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #495057;
-}
-
-.form-control {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.form-control:focus {
-    border-color: #80bdff;
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.fourniture-line {
-    background: white;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    border: 1px solid #e9ecef;
-}
-
-.signature-pad {
-    border: 2px solid #000;
-    border-radius: 4px;
-    background: white;
-}
-
-.alert {
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-}
-
-.alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-}
-
-.alert-danger {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-}
-
-.btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
-}
-
-.btn-primary {
-    background-color: #007bff;
-    color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-    background-color: #0056b3;
-}
-
-.btn-primary:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    color: white;
-}
-
-.btn-outline-secondary {
-    border: 1px solid #6c757d;
-    color: #6c757d;
-    background: transparent;
-}
-
-.btn-lg {
-    padding: 12px 24px;
-    font-size: 16px;
-}
-
-.btn-sm {
-    padding: 4px 8px;
-    font-size: 12px;
-}
-
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    margin: -5px;
-}
-
-.col-md-1, .col-md-2, .col-md-4, .col-md-5, .col-md-6 {
-    padding: 5px;
-}
-
-.col-md-1 { flex: 0 0 8.333333%; }
-.col-md-2 { flex: 0 0 16.666667%; }
-.col-md-4 { flex: 0 0 33.333333%; }
-.col-md-5 { flex: 0 0 41.666667%; }
-.col-md-6 { flex: 0 0 50%; }
-
-.text-center {
-    text-align: center;
-}
-
-.mt-1 { margin-top: 0.25rem; }
-.mt-2 { margin-top: 0.5rem; }
-</style>
-
-
-<style scoped>
-
 </style>
