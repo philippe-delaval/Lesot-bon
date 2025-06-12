@@ -1,6 +1,6 @@
 # Attachements de Travaux
 
-![Laravel](https://img.shields.io/badge/Laravel-10-red.svg)
+![Laravel](https://img.shields.io/badge/Laravel-12-red.svg)
 ![Vue.js](https://img.shields.io/badge/Vue.js-3-green.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)
 ![Inertia.js](https://img.shields.io/badge/Inertia.js-2.0-purple.svg)
@@ -444,7 +444,7 @@ copies or substantial portions of the Software.
 
 ### Mainteneur Principal
 **Philippe Delaval**
-- 📧 Email : [philippe@example.com](mailto:philippe@example.com)
+- 📧 Email : [philippe@example.com](mailto:contact@philippedelaval.com)
 - 🐙 GitHub : [@philippe-delaval](https://github.com/philippe-delaval)
 - 💼 LinkedIn : [Philippe Delaval](https://linkedin.com/in/philippe-delaval)
 

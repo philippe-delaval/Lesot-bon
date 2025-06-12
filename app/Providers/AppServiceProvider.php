@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Attachement;
+use App\Observers\AttachementObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Enregistrement des observateurs
+        Attachement::observe(AttachementObserver::class);
+
         // Configuration pour PostgreSQL
         if (config('database.default') === 'pgsql') {
             // Limite la longueur des chaînes pour les index
