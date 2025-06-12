@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use App\Models\Attachement;
+use App\Http\Requests\AttachementStoreRequest;
 use Carbon\Carbon;
 
 class AttachementController extends Controller
@@ -22,24 +23,10 @@ class AttachementController extends Controller
     /**
      * Enregistrer un nouvel attachement
      */
-    public function store(Request $request)
+    public function store(AttachementStoreRequest $request)
     {
-        // Validation des données
-        $validated = $request->validate([
-            'client_nom' => 'required|string|max:255',
-            'client_email' => 'required|email|max:255',
-            'client_adresse_facturation' => 'required|string',
-            'numero_dossier' => 'nullable|string|max:50',
-            'lieu_intervention' => 'required|string|max:255',
-            'date_intervention' => 'required|date',
-            'designation_travaux' => 'required|string',
-            'fournitures_travaux' => 'required|json',
-            'temps_total_passe' => 'required|numeric|min:0',
-            'signature_entreprise' => 'required|string',
-            'signature_client' => 'required|string',
-            'geolocation' => 'nullable|json',
-            'pdf' => 'required|file|mimes:pdf|max:10240', // Max 10MB
-        ]);
+        // Les données sont déjà validées par AttachementStoreRequest
+        $validated = $request->validated();
 
         try {
             // Décoder les données JSON

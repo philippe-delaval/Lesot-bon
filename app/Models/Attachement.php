@@ -19,6 +19,7 @@ class Attachement extends Model
         'client_id',
         'numero_dossier',
         'client_nom',
+        'nom_signataire_client',
         'client_email',
         'client_adresse_facturation',
         'lieu_intervention',

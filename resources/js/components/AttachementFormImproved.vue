@@ -10,18 +10,10 @@ import { EMAILJS_CONFIG } from '@/config/emailjs'
 import { ArrowLeft, Save, FileText, Plus, Trash2, MapPin, User, Building2, Clock, HelpCircle } from 'lucide-vue-next'
 
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
-import ClientSelector from '@/components/ClientSelector.vue'
+import ClientSelectorDual from '@/components/ClientSelectorDual.vue'
 import Toast from '@/components/Toast.vue'
 
-interface Client {
-  id: number
-  nom: string
-  email: string
-  adresse: string
-  complement_adresse?: string
-  code_postal: string
-  ville: string
-}
+import type { Client } from '@/types/client'
 
 // Props et emits
 defineProps<{
@@ -45,6 +37,7 @@ let signatureClientPad: SignaturePad | null = null
 const form = useForm({
   client_id: null as number | null,
   client_nom: '',
+  nom_signataire_client: '',
   client_email: '',
   client_adresse: '',
   client_complement_adresse: '',
@@ -108,6 +101,8 @@ const onClientSelected = (client: Client | null) => {
     form.client_complement_adresse = client.complement_adresse || ''
     form.client_code_postal = client.code_postal
     form.client_ville = client.ville
+    
+    // Ne pas pré-remplir le nom du signataire - laissé vide pour saisie manuelle
   } else {
     form.client_id = null
     form.client_nom = ''
@@ -116,6 +111,7 @@ const onClientSelected = (client: Client | null) => {
     form.client_complement_adresse = ''
     form.client_code_postal = ''
     form.client_ville = ''
+    // Ne pas vider nom_signataire_client pour préserver la saisie utilisateur
   }
 }
 
@@ -504,27 +500,19 @@ onMounted(() => {
             <div class="space-y-6">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Sélectionner un client <span class="text-red-500">*</span>
+                  Sélection du client <span class="text-red-500">*</span>
                 </label>
-                <ClientSelector
+                <ClientSelectorDual
                   :model-value="selectedClient"
                   @update:model-value="onClientSelected"
+                  @client-selected="onClientSelected"
                   @add-client="onAddClient"
-                  placeholder="Rechercher un client existant..."
-                />
-              </div>
-
-              <!-- Email -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Email <span class="text-red-500">*</span>
-                </label>
-                <input
-                  v-model="form.client_email"
-                  type="email"
-                  required
-                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="client@exemple.com"
+                  :options="{
+                    showCreateButton: true,
+                    placeholder: 'Choisir un client dans la liste',
+                    searchPlaceholder: 'Rechercher un client existant...',
+                    maxResults: 10
+                  }"
                 />
               </div>
             </div>
@@ -838,7 +826,7 @@ onMounted(() => {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Nom du client
+                  Nom du client (référence)
                 </label>
                 <input
                   v-model="form.client_nom"
@@ -846,6 +834,28 @@ onMounted(() => {
                   readonly
                   class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50"
                 />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Nom de la personne qui signe <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.nom_signataire_client"
+                  type="text"
+                  required
+                  placeholder="Nom de la personne qui signe"
+                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  :class="{
+                    'border-red-300 focus:ring-red-500': form.errors.nom_signataire_client
+                  }"
+                />
+                <div v-if="form.errors.nom_signataire_client" class="mt-1 text-sm text-red-600">
+                  {{ form.errors.nom_signataire_client }}
+                </div>
+                <p class="mt-1 text-xs text-gray-500">
+                  Cette personne peut être différente du client principal
+                </p>
               </div>
 
               <div>

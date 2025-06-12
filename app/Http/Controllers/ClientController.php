@@ -98,16 +98,33 @@ class ClientController extends Controller
             ->with('success', 'Client supprimé avec succès.');
     }
 
-    public function api(Request $request)
+    /**
+     * API: Récupérer tous les clients pour la liste déroulante
+     */
+    public function apiList(Request $request)
     {
-        $search = $request->get('search');
+        $clients = Client::query()
+            ->orderBy('nom')
+            ->get(['id', 'nom', 'email', 'adresse', 'complement_adresse', 'code_postal', 'ville']);
+
+        return response()->json($clients);
+    }
+
+    /**
+     * API: Rechercher des clients par terme
+     */
+    public function apiSearch(Request $request)
+    {
+        $search = $request->get('q');
+        
+        if (!$search || strlen($search) < 2) {
+            return response()->json([]);
+        }
         
         $clients = Client::query()
-            ->when($search, function ($query, $search) {
-                $query->search($search);
-            })
+            ->search($search)
             ->orderBy('nom')
-            ->limit(20)
+            ->limit(10)
             ->get(['id', 'nom', 'email', 'adresse', 'complement_adresse', 'code_postal', 'ville']);
 
         return response()->json($clients);

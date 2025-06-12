@@ -13,6 +13,20 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Routes de test pour le sélecteur client (temporaire)
+Route::get('/test-client-selector', function () {
+    return Inertia::render('TestClientSelector');
+})->name('test.client-selector');
+
+// Route de test pour le nom signataire (temporaire)
+Route::get('/test-signataire', function () {
+    return Inertia::render('TestSignataire');
+})->name('test.signataire');
+
+// Routes API temporaires sans auth pour test
+Route::get('/test/api/clients', [ClientController::class, 'apiList'])->name('test.clients.list');
+Route::get('/test/api/clients/search', [ClientController::class, 'apiSearch'])->name('test.clients.search');
+
 Route::middleware(['auth'])->group(function () {
     // Routes pour les attachements de travaux
     Route::get('/attachements', [AttachementController::class, 'index'])->name('attachements.index');
