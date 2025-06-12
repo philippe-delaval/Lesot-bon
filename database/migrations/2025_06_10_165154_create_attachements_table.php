@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('attachements', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->string('numero_dossier')->unique();
             $table->string('client_nom');
             $table->string('client_email');
@@ -26,8 +26,9 @@ return new class extends Migration
             $table->string('signature_client_path');
             $table->string('pdf_path');
             $table->json('geolocation')->nullable();
-            $table->foreignId('created_by')->constrained('users');
-            $table->timestamps();
+            $table->unsignedBigInteger('created_by');
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
+            $table->timestampsTz(precision: 6);
             
             // Index pour améliorer les performances de recherche
             $table->index('numero_dossier');

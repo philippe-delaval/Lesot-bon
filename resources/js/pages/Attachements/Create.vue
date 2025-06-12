@@ -2,8 +2,8 @@
 import { Head, usePage } from '@inertiajs/vue3'
 import { router } from '@inertiajs/core'
 import { onMounted } from 'vue'
-import AppShell from '@/components/AppShell.vue'
-import AttachementForm from '@/components/AttachementForm.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import AttachementFormImproved from '@/components/AttachementFormImproved.vue'
 
 // Vérifier l'authentification
 onMounted(() => {
@@ -16,11 +16,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppShell>
+  <AppLayout>
     <Head title="Nouvel Attachement" />
     
-    <div class="container mx-auto py-6">
-      <AttachementForm />
-    </div>
-  </AppShell>
+    <AttachementFormImproved />
+  </AppLayout>
 </template> 

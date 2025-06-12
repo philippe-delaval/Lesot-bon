@@ -16,6 +16,7 @@ class Attachement extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'client_id',
         'numero_dossier',
         'client_nom',
         'client_email',
@@ -50,6 +51,14 @@ class Attachement extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the client associated with the attachement.
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 
     /**

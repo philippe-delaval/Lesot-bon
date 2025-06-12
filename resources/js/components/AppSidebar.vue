@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Plus, List, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import NavMain from './NavMain.vue';
 import NavFooter from './NavFooter.vue';
@@ -15,9 +15,24 @@ interface NavItem {
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Vue d\'ensemble',
         href: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Nouvel Attachement',
+        href: '/attachements/create',
+        icon: Plus,
+    },
+    {
+        title: 'Liste des Attachements',
+        href: '/attachements',
+        icon: List,
+    },
+    {
+        title: 'Clients',
+        href: '/clients',
+        icon: Users,
     },
 ];
 

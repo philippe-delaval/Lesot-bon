@@ -4,7 +4,7 @@ import { router } from '@inertiajs/core'
 import { ref, onMounted } from 'vue'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import AppShell from '@/components/AppShell.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import { Search, Download, Eye, Plus, Calendar } from 'lucide-vue-next'
 
 // Vérifier l'authentification
@@ -78,10 +78,10 @@ const formatDateTime = (date: string) => {
 </script>
 
 <template>
-  <AppShell>
-    <Head title="Attachements de Travaux" />
+  <AppLayout>
+    <Head title="Liste des Attachements" />
     
-    <div class="container mx-auto py-6 px-4">
+    <div class="flex flex-1 flex-col gap-4 p-4">
       <!-- Messages flash -->
       <div v-if="$page.props.flash?.success" class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
         {{ $page.props.flash.success }}
@@ -264,5 +264,5 @@ const formatDateTime = (date: string) => {
         </div>
       </div>
     </div>
-  </AppShell>
+  </AppLayout>
 </template> 
