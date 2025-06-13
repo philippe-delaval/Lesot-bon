@@ -4,14 +4,14 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AttachementController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DemandeController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 // Routes de test pour le sélecteur client (temporaire)
 Route::get('/test-client-selector', function () {
@@ -38,6 +38,12 @@ Route::middleware(['auth'])->group(function () {
     // Routes pour les clients
     Route::resource('clients', ClientController::class);
     Route::get('/api/clients', [ClientController::class, 'api'])->name('clients.api');
+    
+    // Routes pour les demandes
+    Route::resource('demandes', DemandeController::class);
+    Route::post('demandes/{demande}/assign', [DemandeController::class, 'assign'])->name('demandes.assign');
+    Route::post('demandes/{demande}/complete', [DemandeController::class, 'complete'])->name('demandes.complete');
+    Route::post('demandes/{demande}/convert', [DemandeController::class, 'convertToAttachement'])->name('demandes.convert');
 });
 
 require __DIR__.'/settings.php';

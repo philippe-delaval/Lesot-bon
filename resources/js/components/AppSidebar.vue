@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Plus, List, Users } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Plus, List, Users, ClipboardList, PlusCircle, FileText } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import NavMain from './NavMain.vue';
 import NavFooter from './NavFooter.vue';
@@ -20,6 +20,16 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Liste des demandes',
+        href: '/demandes',
+        icon: ClipboardList,
+    },
+    {
+        title: 'Créer une demande',
+        href: '/demandes/create',
+        icon: PlusCircle,
+    },
+    {
         title: 'Nouvel Attachement',
         href: '/attachements/create',
         icon: Plus,
@@ -27,7 +37,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Liste des Attachements',
         href: '/attachements',
-        icon: List,
+        icon: FileText,
     },
     {
         title: 'Clients',

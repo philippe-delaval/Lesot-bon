@@ -62,6 +62,11 @@ class Attachement extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function demande(): BelongsTo
+    {
+        return $this->belongsTo(Demande::class);
+    }
+
     /**
      * Get the full URL for the PDF file.
      */
