@@ -31,6 +31,11 @@ class Client extends Model
         return $this->hasMany(Attachement::class);
     }
 
+    public function demandes(): HasMany
+    {
+        return $this->hasMany(Demande::class);
+    }
+
     public function getAdresseCompleteAttribute(): string
     {
         $adresse = $this->adresse;
