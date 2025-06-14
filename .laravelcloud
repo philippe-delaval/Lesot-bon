@@ -1,0 +1,8 @@
+# Laravel Cloud Build Configuration
+[build]
+build-command = "npm ci && npm run build"
+publish-directory = "public"
+
+[build.environment]
+NODE_VERSION = "20"
+NPM_FLAGS = "--legacy-peer-deps"
