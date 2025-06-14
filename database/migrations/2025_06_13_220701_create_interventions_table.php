@@ -88,6 +88,7 @@ return new class extends Migration
 
     public function down()
     {
+        DB::statement('DROP INDEX IF EXISTS interventions_competences_requises_index');
         Schema::dropIfExists('interventions');
     }
 };
