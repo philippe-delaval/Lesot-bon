@@ -3,13 +3,11 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('equipements', function (Blueprint $table) {
             $table->id();
@@ -47,13 +45,13 @@ return new class extends Migration
             // Affectation et utilisation
             $table->foreignId('technicien_id')->nullable()->constrained()->nullOnDelete();
             $table->string('statut')->default('disponible'); // disponible, reserve, en_utilisation, maintenance
-            $table->json('competences_associees')->nullable();
+            $table->jsonb('competences_associees')->nullable();
             $table->boolean('transportable')->default(true);
             $table->decimal('poids_kg', 8, 2)->nullable();
             $table->text('instructions_utilisation')->nullable();
             
             // Traçabilité
-            $table->json('historique_utilisation')->nullable();
+            $table->jsonb('historique_utilisation')->nullable();
             $table->timestamp('derniere_utilisation')->nullable();
             $table->integer('nombre_utilisations')->default(0);
             $table->boolean('actif')->default(true);
@@ -64,15 +62,17 @@ return new class extends Migration
             $table->index(['statut', 'actif']);
             $table->index(['stock_disponible', 'stock_minimum']);
             $table->index(['technicien_id', 'statut']);
-            $table->index('competences_associees');
         });
+
+        // Créer les index GIN pour les colonnes JSONB
+        DB::statement('CREATE INDEX equipements_competences_associees_gin_idx ON equipements USING GIN (competences_associees)');
+        DB::statement('CREATE INDEX equipements_historique_utilisation_gin_idx ON equipements USING GIN (historique_utilisation)');
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
+        DB::statement('DROP INDEX IF EXISTS equipements_competences_associees_gin_idx');
+        DB::statement('DROP INDEX IF EXISTS equipements_historique_utilisation_gin_idx');
         Schema::dropIfExists('equipements');
     }
 };
