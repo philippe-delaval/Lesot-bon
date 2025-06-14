@@ -56,4 +56,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Demande::class, 'receveur_id');
     }
+
+    public function technicien()
+    {
+        return $this->hasOne(Technicien::class);
+    }
 }
