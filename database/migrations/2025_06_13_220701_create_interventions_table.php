@@ -3,13 +3,11 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('interventions', function (Blueprint $table) {
             $table->id();
@@ -21,7 +19,7 @@ return new class extends Migration
             // Type et caractéristiques
             $table->string('type_intervention'); // preventive, corrective, urgente, installation
             $table->text('description_technique');
-            $table->json('competences_requises'); // ['plomberie', 'electricite']
+            $table->jsonb('competences_requises')->nullable(); // ['plomberie', 'electricite']
             $table->string('priorite')->default('normale'); // basse, normale, haute, urgente
             $table->string('statut')->default('planifiee'); // planifiee, en_route, sur_site, en_cours, terminee, annulee
             
@@ -44,18 +42,18 @@ return new class extends Migration
             $table->integer('temps_trajet_estime_min')->nullable();
             
             // Équipements et ressources
-            $table->json('equipements_necessaires')->nullable();
-            $table->json('pieces_detachees')->nullable();
-            $table->json('outils_speciaux')->nullable();
+            $table->jsonb('equipements_necessaires')->nullable();
+            $table->jsonb('pieces_detachees')->nullable();
+            $table->jsonb('outils_speciaux')->nullable();
             $table->decimal('cout_estime', 10, 2)->nullable();
             $table->decimal('cout_reel', 10, 2)->nullable();
             
             // Résultats et suivi
             $table->text('diagnostic')->nullable();
             $table->text('actions_realisees')->nullable();
-            $table->json('pieces_utilisees')->nullable();
-            $table->json('photos_avant')->nullable();
-            $table->json('photos_apres')->nullable();
+            $table->jsonb('pieces_utilisees')->nullable();
+            $table->jsonb('photos_avant')->nullable();
+            $table->jsonb('photos_apres')->nullable();
             $table->text('signature_client_path')->nullable();
             $table->text('rapport_technique')->nullable();
             $table->boolean('intervention_reussie')->nullable();
@@ -72,7 +70,7 @@ return new class extends Migration
             // Suivi qualité
             $table->boolean('first_time_fix')->nullable();
             $table->integer('temps_resolution_minutes')->nullable();
-            $table->json('kpis')->nullable(); // Métriques calculées
+            $table->jsonb('kpis')->nullable(); // Métriques calculées
             
             $table->timestamps();
             
@@ -82,14 +80,13 @@ return new class extends Migration
             $table->index(['client_id', 'date_planifiee']);
             $table->index(['type_intervention', 'priorite']);
             $table->index(['latitude', 'longitude']);
-            $table->index('competences_requises');
         });
+
+        // Créer l'index GIN séparément
+        DB::statement('CREATE INDEX interventions_competences_requises_index ON interventions USING gin (competences_requises)');
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('interventions');
     }
