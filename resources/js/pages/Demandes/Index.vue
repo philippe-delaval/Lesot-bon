@@ -88,26 +88,27 @@ const statsCards = computed(() => [
   <Head title="Demandes en cours" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="space-y-6">
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <Heading>
-          Demandes en cours
-          <template #description>
-            Gérez les demandes d'intervention et suivez leur progression
-          </template>
-        </Heading>
+    <!-- Container responsive avec marges mobile-first -->
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 xl:px-12 py-4 md:py-6 lg:py-8">
+      <div class="space-y-4 md:space-y-6 lg:space-y-8">
+        <!-- Header responsive -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Heading title="Demandes en cours">
+            <template #description>
+              Gérez les demandes d'intervention et suivez leur progression
+            </template>
+          </Heading>
 
-        <div class="flex gap-2">
-          <Button as="link" :href="route('demandes.create')" class="gap-2">
-            <Plus class="h-4 w-4" />
-            Nouvelle demande
-          </Button>
+          <div class="flex gap-2">
+            <Button as="link" :href="route('demandes.create')" class="w-full sm:w-auto gap-2">
+              <Plus class="h-4 w-4" />
+              Nouvelle demande
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Stats Cards responsive -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
         <Card v-for="stat in statsCards" :key="stat.title">
           <CardHeader class="pb-2">
             <CardTitle class="text-sm font-medium text-muted-foreground">
@@ -125,16 +126,16 @@ const statsCards = computed(() => [
         </Card>
       </div>
 
-      <!-- Filters -->
-      <Card>
-        <CardHeader>
-          <CardTitle class="flex items-center gap-2">
-            <Filter class="h-4 w-4" />
-            Filtres
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Filtres responsive -->
+        <Card>
+          <CardHeader>
+            <CardTitle class="flex items-center gap-2">
+              <Filter class="h-4 w-4" />
+              Filtres
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             <div class="space-y-2">
               <label class="text-sm font-medium">Recherche</label>
               <div class="relative">
@@ -196,29 +197,29 @@ const statsCards = computed(() => [
             </div>
           </div>
 
-          <div class="flex justify-end gap-2 mt-4">
-            <Button variant="outline" @click="resetFilters">
-              Réinitialiser
-            </Button>
-            <Button @click="applyFilters">
-              Appliquer
-            </Button>
-          </div>
+            <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mt-4">
+              <Button variant="outline" @click="resetFilters" class="w-full sm:w-auto">
+                Réinitialiser
+              </Button>
+              <Button @click="applyFilters" class="w-full sm:w-auto">
+                Appliquer
+              </Button>
+            </div>
         </CardContent>
       </Card>
 
-      <!-- Demandes List -->
-      <div v-if="demandes.data.length > 0" class="space-y-4">
-        <div class="grid grid-cols-1 gap-4">
+        <!-- Liste des demandes responsive -->
+        <div v-if="demandes.data.length > 0" class="space-y-4">
+          <div class="grid grid-cols-1 gap-3 md:gap-4 lg:gap-6">
           <DemandeCard 
             v-for="demande in demandes.data" 
             :key="demande.id"
             :demande="demande"
           />
-        </div>
+          </div>
 
-        <!-- Pagination -->
-        <div v-if="demandes.meta.total > demandes.meta.per_page" class="flex justify-center">
+          <!-- Pagination responsive -->
+          <div v-if="demandes.meta.total > demandes.meta.per_page" class="flex justify-center">
           <nav class="flex items-center gap-2">
             <template v-for="link in demandes.links" :key="link.url">
               <Link
@@ -239,11 +240,11 @@ const statsCards = computed(() => [
               />
             </template>
           </nav>
+          </div>
         </div>
-      </div>
 
-      <!-- Empty State -->
-      <Card v-else class="text-center py-12">
+        <!-- Empty State responsive -->
+        <Card v-else class="text-center py-8 md:py-12">
         <CardContent>
           <div class="space-y-4">
             <div class="text-4xl text-gray-300">📋</div>
@@ -255,13 +256,14 @@ const statsCards = computed(() => [
                 Créez votre première demande d'intervention pour commencer.
               </p>
             </div>
-            <Button as="link" :href="route('demandes.create')" class="gap-2">
-              <Plus class="h-4 w-4" />
-              Créer une demande
-            </Button>
+              <Button as="link" :href="route('demandes.create')" class="w-full sm:w-auto gap-2">
+                <Plus class="h-4 w-4" />
+                Créer une demande
+              </Button>
           </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   </AppLayout>
 </template>

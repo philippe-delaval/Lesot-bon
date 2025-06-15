@@ -81,27 +81,38 @@ const formatDateTime = (date: string) => {
   <AppLayout>
     <Head title="Liste des Attachements" />
     
-    <div class="flex flex-1 flex-col gap-4 p-4">
-      <!-- Messages flash -->
-      <div v-if="$page.props.flash?.success" class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-        {{ $page.props.flash.success }}
-      </div>
+    <!-- Container responsive avec marges mobile-first -->
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
+      <div class="space-y-4 md:space-y-6 lg:space-y-8">
+        <!-- Messages flash -->
+        <div v-if="$page.props.flash?.success" class="p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+          {{ $page.props.flash.success }}
+        </div>
+        
+        <!-- Header responsive -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="bg-blue-100 p-2 rounded-lg">
+              <Download class="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Attachements de Travaux</h1>
+              <p class="text-gray-600 text-sm">Gestion des attachements d'intervention</p>
+            </div>
+          </div>
+          <Link
+            :href="route('attachements.create')"
+            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus class="w-5 h-5 mr-2" />
+            Nouvel Attachement
+          </Link>
+        </div>
       
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Attachements de Travaux</h1>
-        <Link
-          :href="route('attachements.create')"
-          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus class="w-5 h-5 mr-2" />
-          Nouvel Attachement
-        </Link>
-      </div>
-      
-      <!-- Filtres -->
-      <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Filtres responsive -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div class="p-4 md:p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Rechercher</label>
             <div class="relative">
@@ -134,27 +145,72 @@ const formatDateTime = (date: string) => {
             />
           </div>
           
-          <div class="flex items-end gap-2">
-            <button
-              @click="applyFilters"
-              class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-            >
-              Filtrer
-            </button>
-            <button
-              @click="resetFilters"
-              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-            >
-              Réinitialiser
-            </button>
+            </div>
+            
+            <!-- Boutons responsive -->
+            <div class="flex flex-col sm:flex-row gap-2 mt-4">
+              <button
+                @click="applyFilters"
+                class="w-full sm:w-auto px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+              >
+                Filtrer
+              </button>
+              <button
+                @click="resetFilters"
+                class="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Réinitialiser
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Tableau -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
+        
+        <!-- Attachements responsive -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <!-- Version mobile : Cartes -->
+          <div class="block lg:hidden divide-y divide-gray-200">
+            <div v-for="attachement in attachements.data" :key="attachement.id" class="p-4 hover:bg-gray-50">
+              <div class="flex justify-between items-start mb-3">
+                <div class="font-medium text-gray-900">{{ attachement.numero_dossier }}</div>
+                <div class="flex gap-2">
+                  <Link
+                    :href="route('attachements.show', attachement.id)"
+                    class="text-blue-600 hover:text-blue-900"
+                    title="Voir"
+                  >
+                    <Eye class="w-5 h-5" />
+                  </Link>
+                  <Link
+                    :href="route('attachements.download-pdf', attachement.id)"
+                    class="text-green-600 hover:text-green-900"
+                    title="Télécharger PDF"
+                  >
+                    <Download class="w-5 h-5" />
+                  </Link>
+                </div>
+              </div>
+              <div class="space-y-1">
+                <div class="text-sm text-gray-600">{{ attachement.client_nom }}</div>
+                <div class="text-sm text-gray-600">{{ attachement.lieu_intervention }}</div>
+                <div class="flex items-center text-sm text-gray-500">
+                  <Calendar class="w-4 h-4 mr-1" />
+                  {{ formatDate(attachement.date_intervention) }}
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-500">{{ formatDateTime(attachement.created_at) }}</span>
+                  <span class="font-medium">{{ attachement.temps_total_passe }}h</span>
+                </div>
+              </div>
+            </div>
+            
+            <div v-if="attachements.data.length === 0" class="p-6 text-center text-gray-500">
+              Aucun attachement trouvé
+            </div>
+          </div>
+          
+          <!-- Version desktop : Tableau -->
+          <div class="hidden lg:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -233,33 +289,36 @@ const formatDateTime = (date: string) => {
                   Aucun attachement trouvé
                 </td>
               </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <!-- Pagination -->
-        <div v-if="attachements.last_page > 1" class="bg-gray-50 px-6 py-3 flex items-center justify-between">
-          <div class="text-sm text-gray-700">
-            Affichage de {{ (attachements.current_page - 1) * attachements.per_page + 1 }} à 
-            {{ Math.min(attachements.current_page * attachements.per_page, attachements.total) }} sur 
-            {{ attachements.total }} résultats
+              </tbody>
+            </table>
           </div>
           
-          <div class="flex gap-2">
-            <Link
-              v-for="page in attachements.last_page"
-              :key="page"
-              :href="`/attachements?page=${page}`"
-              :class="[
-                'px-3 py-1 rounded',
-                page === attachements.current_page
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
-              ]"
-              preserve-state
-            >
-              {{ page }}
-            </Link>
+          <!-- Pagination responsive -->
+          <div v-if="attachements.last_page > 1" class="bg-gray-50 px-4 md:px-6 py-3">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="text-sm text-gray-700 text-center sm:text-left">
+                Affichage de {{ (attachements.current_page - 1) * attachements.per_page + 1 }} à 
+                {{ Math.min(attachements.current_page * attachements.per_page, attachements.total) }} sur 
+                {{ attachements.total }} résultats
+              </div>
+              
+              <div class="flex gap-1 justify-center">
+                <Link
+                  v-for="page in attachements.last_page"
+                  :key="page"
+                  :href="`/attachements?page=${page}`"
+                  :class="[
+                    'px-3 py-1 rounded text-sm',
+                    page === attachements.current_page
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                  ]"
+                  preserve-state
+                >
+                  {{ page }}
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>

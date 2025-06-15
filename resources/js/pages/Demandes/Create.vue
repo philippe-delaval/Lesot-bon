@@ -54,147 +54,156 @@ const submit = () => {
   <Head title="Nouvelle demande" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="max-w-2xl mx-auto space-y-6">
-      <Heading>
-        Nouvelle demande d'intervention
-        <template #description>
-          Créez une nouvelle demande qui sera traitée par l'équipe
-        </template>
-      </Heading>
+    <!-- Container responsive optimisé -->
+    <div class="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
+      <div class="space-y-4 md:space-y-6">
+        <Heading title="Nouvelle demande d'intervention">
+          <template #description>
+            Créez une nouvelle demande qui sera traitée par l'équipe
+          </template>
+        </Heading>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations de la demande</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form @submit.prevent="submit" class="space-y-6">
-            <!-- Titre -->
-            <div class="space-y-2">
-              <Label for="titre">Titre *</Label>
-              <Input
-                id="titre"
-                v-model="form.titre"
-                placeholder="Résumé de l'intervention demandée"
-                :class="{ 'border-red-500': form.errors.titre }"
-              />
-              <InputError :message="form.errors.titre" />
-            </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Informations de la demande</CardTitle>
+          </CardHeader>
+          <CardContent class="p-4 md:p-6">
+            <form @submit.prevent="submit" class="space-y-4 md:space-y-6">
+              <!-- Grille responsive pour les champs principaux -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                <!-- Titre -->
+                <div class="space-y-2">
+                  <Label for="titre">Titre *</Label>
+                  <Input
+                    id="titre"
+                    v-model="form.titre"
+                    placeholder="Résumé de l'intervention demandée"
+                    :class="{ 'border-red-500': form.errors.titre }"
+                  />
+                  <InputError :message="form.errors.titre" />
+                </div>
 
-            <!-- Description -->
-            <div class="space-y-2">
-              <Label for="description">Description *</Label>
-              <Textarea
-                id="description"
-                v-model="form.description"
-                placeholder="Description détaillée de l'intervention demandée"
-                rows="4"
-                :class="{ 'border-red-500': form.errors.description }"
-              />
-              <InputError :message="form.errors.description" />
-            </div>
+                <!-- Priorité -->
+                <div class="space-y-2">
+                  <Label for="priorite">Priorité *</Label>
+                  <Select v-model="form.priorite">
+                    <SelectTrigger :class="{ 'border-red-500': form.errors.priorite }">
+                      <SelectValue placeholder="Sélectionner une priorité" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="basse">Basse</SelectItem>
+                      <SelectItem value="normale">Normale</SelectItem>
+                      <SelectItem value="haute">Haute</SelectItem>
+                      <SelectItem value="urgente">Urgente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <InputError :message="form.errors.priorite" />
+                </div>
+              </div>
 
-            <!-- Priorité -->
-            <div class="space-y-2">
-              <Label for="priorite">Priorité *</Label>
-              <Select v-model="form.priorite">
-                <SelectTrigger :class="{ 'border-red-500': form.errors.priorite }">
-                  <SelectValue placeholder="Sélectionner une priorité" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="basse">Basse</SelectItem>
-                  <SelectItem value="normale">Normale</SelectItem>
-                  <SelectItem value="haute">Haute</SelectItem>
-                  <SelectItem value="urgente">Urgente</SelectItem>
-                </SelectContent>
-              </Select>
-              <InputError :message="form.errors.priorite" />
-            </div>
+              <!-- Description (pleine largeur) -->
+              <div class="space-y-2">
+                <Label for="description">Description *</Label>
+                <Textarea
+                  id="description"
+                  v-model="form.description"
+                  placeholder="Description détaillée de l'intervention demandée"
+                  rows="4"
+                  :class="{ 'border-red-500': form.errors.description }"
+                />
+                <InputError :message="form.errors.description" />
+              </div>
 
-            <!-- Client -->
-            <div class="space-y-2">
-              <Label for="client">Client</Label>
-              <Select v-model="form.client_id">
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un client (optionnel)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="client in clients"
-                    :key="client.id"
-                    :value="client.id.toString()"
-                  >
-                    {{ client.nom }} - {{ client.email }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <InputError :message="form.errors.client_id" />
-            </div>
+              <!-- Grille responsive pour les champs secondaires -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                <!-- Client -->
+                <div class="space-y-2">
+                  <Label for="client">Client</Label>
+                  <Select v-model="form.client_id">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un client (optionnel)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="client in clients"
+                        :key="client.id"
+                        :value="client.id.toString()"
+                      >
+                        {{ client.nom }} - {{ client.email }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <InputError :message="form.errors.client_id" />
+                </div>
 
-            <!-- Lieu d'intervention -->
-            <div class="space-y-2">
-              <Label for="lieu_intervention">Lieu d'intervention</Label>
-              <Input
-                id="lieu_intervention"
-                v-model="form.lieu_intervention"
-                placeholder="Adresse ou lieu de l'intervention"
-              />
-              <InputError :message="form.errors.lieu_intervention" />
-            </div>
+                <!-- Date souhaitée -->
+                <div class="space-y-2">
+                  <Label for="date_souhaite_intervention">Date souhaitée</Label>
+                  <Input
+                    id="date_souhaite_intervention"
+                    v-model="form.date_souhaite_intervention"
+                    type="datetime-local"
+                    :min="new Date().toISOString().slice(0, 16)"
+                  />
+                  <InputError :message="form.errors.date_souhaite_intervention" />
+                </div>
+              </div>
 
-            <!-- Date souhaitée -->
-            <div class="space-y-2">
-              <Label for="date_souhaite_intervention">Date souhaitée</Label>
-              <Input
-                id="date_souhaite_intervention"
-                v-model="form.date_souhaite_intervention"
-                type="datetime-local"
-                :min="new Date().toISOString().slice(0, 16)"
-              />
-              <InputError :message="form.errors.date_souhaite_intervention" />
-            </div>
+              <!-- Lieu d'intervention (pleine largeur) -->
+              <div class="space-y-2">
+                <Label for="lieu_intervention">Lieu d'intervention</Label>
+                <Input
+                  id="lieu_intervention"
+                  v-model="form.lieu_intervention"
+                  placeholder="Adresse ou lieu de l'intervention"
+                />
+                <InputError :message="form.errors.lieu_intervention" />
+              </div>
 
-            <!-- Assignation directe (optionnelle) -->
-            <div class="space-y-2">
-              <Label for="receveur">Assigner directement à</Label>
-              <Select v-model="form.receveur_id">
-                <SelectTrigger>
-                  <SelectValue placeholder="Laisser vide pour assignation ultérieure" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="user in users"
-                    :key="user.id"
-                    :value="user.id.toString()"
-                  >
-                    {{ user.name }} - {{ user.email }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <InputError :message="form.errors.receveur_id" />
-            </div>
+              <!-- Assignation directe (pleine largeur) -->
+              <div class="space-y-2">
+                <Label for="receveur">Assigner directement à</Label>
+                <Select v-model="form.receveur_id">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Laisser vide pour assignation ultérieure" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="user in users"
+                      :key="user.id"
+                      :value="user.id.toString()"
+                    >
+                      {{ user.name }} - {{ user.email }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <InputError :message="form.errors.receveur_id" />
+              </div>
 
-            <!-- Boutons -->
-            <div class="flex justify-end gap-3 pt-6">
-              <Button
-                type="button"
-                variant="outline"
-                as="link"
-                :href="route('demandes.index')"
-              >
-                Annuler
-              </Button>
-              <Button
-                type="submit"
-                :disabled="form.processing"
-                class="min-w-[120px]"
-              >
-                <span v-if="form.processing">Création...</span>
-                <span v-else>Créer la demande</span>
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              <!-- Boutons responsive -->
+              <div class="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 md:pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  as="link"
+                  :href="route('demandes.index')"
+                  class="w-full sm:w-auto"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  :disabled="form.processing"
+                  class="w-full sm:w-auto min-w-[120px]"
+                >
+                  <span v-if="form.processing">Création...</span>
+                  <span v-else>Créer la demande</span>
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   </AppLayout>
 </template>
