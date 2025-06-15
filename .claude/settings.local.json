@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run build:*)",
+      "Bash(grep:*)",
+      "Bash(php artisan tinker:*)",
+      "Bash(php artisan:*)",
+      "Bash(npm install:*)",
+      "Bash(npm update:*)",
+      "Bash(git add:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run dev:*)",
+      "Bash(pkill:*)"
+    ],
+    "deny": []
+  }
+}
