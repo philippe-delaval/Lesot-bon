@@ -43,16 +43,17 @@ const formatDate = (date: string) => {
   <AppLayout>
     <Head title="Dashboard" />
     
-    <div class="space-y-6">
-      <Heading>
-        Vue d'ensemble
-        <template #description>
-          Suivez l'activité de vos demandes et attachements
-        </template>
-      </Heading>
+    <!-- Container responsive avec marges mobile-first -->
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 xl:px-12 py-4 md:py-6 lg:py-8">
+      <div class="space-y-4 md:space-y-6 lg:space-y-8">
+        <Heading title="Vue d'ensemble">
+          <template #description>
+            Suivez l'activité de vos demandes et attachements
+          </template>
+        </Heading>
 
-      <!-- Statistiques principales -->
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <!-- Statistiques principales -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
         <!-- Demandes en attente -->
         <Card>
           <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -110,7 +111,7 @@ const formatDate = (date: string) => {
         </Card>
       </div>
 
-      <div class="grid gap-6 md:grid-cols-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
         <!-- Demandes urgentes -->
         <Card>
           <CardHeader class="flex flex-row items-center justify-between">
@@ -127,7 +128,7 @@ const formatDate = (date: string) => {
               <div 
                 v-for="demande in demandes_urgentes" 
                 :key="demande.id"
-                class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200"
+                class="flex items-center justify-between p-3 md:p-4 bg-red-50 rounded-lg border border-red-200"
               >
                 <div class="flex-1">
                   <Link 
@@ -166,7 +167,7 @@ const formatDate = (date: string) => {
               <div 
                 v-for="demande in demandes_recentes" 
                 :key="demande.id"
-                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                class="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg"
               >
                 <div class="flex-1">
                   <Link 
@@ -191,8 +192,8 @@ const formatDate = (date: string) => {
         </Card>
       </div>
 
-      <!-- Statistiques détaillées -->
-      <div class="grid gap-4 md:grid-cols-3">
+        <!-- Statistiques détaillées -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
         <!-- Stats demandes -->
         <Card>
           <CardHeader>
@@ -263,6 +264,7 @@ const formatDate = (date: string) => {
             </Button>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   </AppLayout>
