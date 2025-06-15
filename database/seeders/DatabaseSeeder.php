@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
         // Appel des seeders spécialisés
         $this->call([
             AttachementSeeder::class,
+            EmployeSeeder::class,
+            EquipeSeeder::class,
+            PlanningSeeder::class,
         ]);
     }
 }

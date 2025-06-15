@@ -6,6 +6,9 @@ use App\Http\Controllers\AttachementController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmployeController;
+use App\Http\Controllers\EquipeController;
+use App\Http\Controllers\PlanningController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -44,6 +47,24 @@ Route::middleware(['auth'])->group(function () {
     Route::post('demandes/{demande}/assign', [DemandeController::class, 'assign'])->name('demandes.assign');
     Route::post('demandes/{demande}/complete', [DemandeController::class, 'complete'])->name('demandes.complete');
     Route::post('demandes/{demande}/convert', [DemandeController::class, 'convertToAttachement'])->name('demandes.convert');
+    
+    // Routes pour les employés
+    Route::resource('employes', EmployeController::class);
+    Route::get('/api/employes', [EmployeController::class, 'apiList'])->name('employes.api');
+    Route::get('/api/employes/search', [EmployeController::class, 'apiSearch'])->name('employes.search');
+    
+    // Routes pour les équipes
+    Route::resource('equipes', EquipeController::class);
+    Route::post('equipes/{equipe}/employes', [EquipeController::class, 'ajouterEmploye'])->name('equipes.ajouter-employe');
+    Route::delete('equipes/{equipe}/employes/{employe}', [EquipeController::class, 'retirerEmploye'])->name('equipes.retirer-employe');
+    Route::get('/api/equipes', [EquipeController::class, 'apiList'])->name('equipes.api');
+    
+    // Routes pour le planning
+    Route::resource('planning', PlanningController::class);
+    Route::post('planning/{planning}/demarrer', [PlanningController::class, 'demarrer'])->name('planning.demarrer');
+    Route::post('planning/{planning}/terminer', [PlanningController::class, 'terminer'])->name('planning.terminer');
+    Route::post('planning/{planning}/valider', [PlanningController::class, 'valider'])->name('planning.valider');
+    Route::get('/api/planning/calendrier', [PlanningController::class, 'calendrierData'])->name('planning.calendrier-data');
 });
 
 require __DIR__.'/settings.php';
