@@ -16,8 +16,13 @@ class EmployeController extends Controller
         $habilitation = $request->get('habilitation');
         $disponibilite = $request->get('disponibilite');
         
+        // Requête principale optimisée avec eager loading
         $employes = Employe::query()
-            ->with(['chargeProjet', 'gestionnaire', 'equipeActive'])
+            ->with([
+                'chargeProjet:id,nom,prenom',
+                'gestionnaire:id,nom,prenom',
+                'equipeActive:id,nom'
+            ])
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nom', 'ILIKE', "%{$search}%")
@@ -40,6 +45,9 @@ class EmployeController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        // Optimisation des statistiques avec une seule requête
+        $statistiques = $this->getStatistiquesOptimisees($search, $statut, $habilitation, $disponibilite);
+
         return Inertia::render('Employes/Index', [
             'employes' => $employes,
             'filters' => [
@@ -48,28 +56,64 @@ class EmployeController extends Controller
                 'habilitation' => $habilitation,
                 'disponibilite' => $disponibilite,
             ],
-            'statistiques' => [
-                'total' => Employe::count(),
-                'permanents' => Employe::permanents()->count(),
-                'interimaires' => Employe::interimaires()->count(),
-                'disponibles' => Employe::disponibles()->count(),
-            ]
+            'statistiques' => $statistiques
         ]);
+    }
+
+    /**
+     * Optimise les statistiques en utilisant une seule requête avec des sous-requêtes
+     */
+    private function getStatistiquesOptimisees($search = null, $statut = null, $habilitation = null, $disponibilite = null): array
+    {
+        $baseQuery = Employe::query()
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nom', 'ILIKE', "%{$search}%")
+                      ->orWhere('prenom', 'ILIKE', "%{$search}%")
+                      ->orWhere('email', 'ILIKE', "%{$search}%")
+                      ->orWhere('matricule', 'ILIKE', "%{$search}%");
+                });
+            })
+            ->when($statut, function ($query, $statut) {
+                $query->where('statut', $statut);
+            })
+            ->when($habilitation, function ($query, $habilitation) {
+                $query->avecHabilitation($habilitation);
+            })
+            ->when($disponibilite, function ($query, $disponibilite) {
+                $query->where('disponibilite', $disponibilite);
+            });
+
+        // Une seule requête pour toutes les statistiques
+        $stats = $baseQuery->selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN statut = ? THEN 1 ELSE 0 END) as permanents,
+            SUM(CASE WHEN statut = ? THEN 1 ELSE 0 END) as interimaires,
+            SUM(CASE WHEN disponibilite = ? THEN 1 ELSE 0 END) as disponibles
+        ', ['permanent', 'interimaire', 'disponible'])
+        ->first();
+
+        return [
+            'total' => $stats->total ?? 0,
+            'permanents' => $stats->permanents ?? 0,
+            'interimaires' => $stats->interimaires ?? 0,
+            'disponibles' => $stats->disponibles ?? 0,
+        ];
     }
 
     public function create(): Response
     {
-        $gestionnaires = Employe::gestionnaires()
+        // Optimisation : une seule requête pour récupérer gestionnaires et charges de projet
+        $employesHierarchiques = Employe::query()
+            ->whereIn('role_hierarchique', ['gestionnaire', 'charge_projet'])
+            ->orderBy('role_hierarchique')
             ->orderBy('nom')
-            ->get(['id', 'nom', 'prenom']);
-            
-        $chargesProjets = Employe::chargesProjets()
-            ->orderBy('nom')
-            ->get(['id', 'nom', 'prenom']);
+            ->get(['id', 'nom', 'prenom', 'role_hierarchique'])
+            ->groupBy('role_hierarchique');
 
         return Inertia::render('Employes/Create', [
-            'gestionnaires' => $gestionnaires,
-            'chargesProjets' => $chargesProjets,
+            'gestionnaires' => $employesHierarchiques['gestionnaire'] ?? collect(),
+            'chargesProjets' => $employesHierarchiques['charge_projet'] ?? collect(),
             'habilitations' => $this->getHabilitationsElectriques(),
             'certifications' => $this->getCertifications(),
         ]);
@@ -135,20 +179,19 @@ class EmployeController extends Controller
 
     public function edit(Employe $employe): Response
     {
-        $gestionnaires = Employe::gestionnaires()
+        // Optimisation : une seule requête pour récupérer gestionnaires et charges de projet
+        $employesHierarchiques = Employe::query()
+            ->whereIn('role_hierarchique', ['gestionnaire', 'charge_projet'])
             ->where('id', '!=', $employe->id)
+            ->orderBy('role_hierarchique')
             ->orderBy('nom')
-            ->get(['id', 'nom', 'prenom']);
-            
-        $chargesProjets = Employe::chargesProjets()
-            ->where('id', '!=', $employe->id)
-            ->orderBy('nom')
-            ->get(['id', 'nom', 'prenom']);
+            ->get(['id', 'nom', 'prenom', 'role_hierarchique'])
+            ->groupBy('role_hierarchique');
 
         return Inertia::render('Employes/Edit', [
             'employe' => $employe,
-            'gestionnaires' => $gestionnaires,
-            'chargesProjets' => $chargesProjets,
+            'gestionnaires' => $employesHierarchiques['gestionnaire'] ?? collect(),
+            'chargesProjets' => $employesHierarchiques['charge_projet'] ?? collect(),
             'habilitations' => $this->getHabilitationsElectriques(),
             'certifications' => $this->getCertifications(),
         ]);

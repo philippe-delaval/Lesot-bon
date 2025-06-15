@@ -22,8 +22,11 @@ class DemandeController extends Controller
     public function index(Request $request): Response
     {
         $user = auth()->user();
-        $query = Demande::with(['createur', 'receveur', 'client'])
-            ->orderBy('created_at', 'desc');
+        $query = Demande::with([
+            'createur:id,name',
+            'receveur:id,name',
+            'client:id,nom'
+        ])->orderBy('created_at', 'desc');
 
         if ($request->has('role') && $request->role === 'assignees') {
             $query->assigneesA($user->id);
@@ -46,21 +49,38 @@ class DemandeController extends Controller
 
         $demandes = $query->paginate(10);
 
+        // Statistiques groupées en une seule requête
+        $stats = Demande::selectRaw('
+            SUM(CASE WHEN statut = ? THEN 1 ELSE 0 END) as en_attente,
+            SUM(CASE WHEN receveur_id = ? AND statut IN (\'assignee\', \'en_cours\') THEN 1 ELSE 0 END) as assignees,
+            SUM(CASE WHEN createur_id = ? AND statut NOT IN (\'terminee\', \'annulee\') THEN 1 ELSE 0 END) as mes_creees
+        ', [
+            'en_attente',
+            $user->id,
+            $user->id
+        ])->first();
+
         return Inertia::render('Demandes/Index', [
             'demandes' => $demandes,
             'filters' => $request->only(['role', 'statut', 'priorite']),
             'stats' => [
-                'en_attente' => Demande::where('statut', 'en_attente')->count(),
-                'assignees' => Demande::assigneesA($user->id)->count(),
-                'mes_creees' => Demande::creesPar($user->id)->enCours()->count(),
+                'en_attente' => $stats->en_attente ?? 0,
+                'assignees' => $stats->assignees ?? 0,
+                'mes_creees' => $stats->mes_creees ?? 0,
             ]
         ]);
     }
 
     public function create(): Response
     {
-        $users = User::select('id', 'name', 'email')->get();
-        $clients = Client::select('id', 'nom', 'email')->get();
+        // Cache des utilisateurs et clients avec TTL de 5 minutes
+        $users = cache()->remember('users_for_demande_form', 300, function () {
+            return User::pourFormulaires()->get();
+        });
+        
+        $clients = cache()->remember('clients_for_demande_form', 300, function () {
+            return Client::pourFormulaires()->get();
+        });
 
         return Inertia::render('Demandes/Create', [
             'users' => $users,
@@ -95,11 +115,17 @@ class DemandeController extends Controller
 
     public function edit(Demande $demande): Response
     {
-        $users = User::select('id', 'name', 'email')->get();
-        $clients = Client::select('id', 'nom', 'email')->get();
+        // Cache des utilisateurs et clients avec TTL de 5 minutes
+        $users = cache()->remember('users_for_demande_form', 300, function () {
+            return User::pourFormulaires()->get();
+        });
+        
+        $clients = cache()->remember('clients_for_demande_form', 300, function () {
+            return Client::pourFormulaires()->get();
+        });
 
         return Inertia::render('Demandes/Edit', [
-            'demande' => $demande->load(['createur', 'receveur', 'client']),
+            'demande' => $demande->load(['createur:id,name', 'receveur:id,name', 'client:id,nom']),
             'users' => $users,
             'clients' => $clients,
         ]);

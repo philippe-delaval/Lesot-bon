@@ -55,4 +55,17 @@ class Client extends Model
                 ->orWhere('ville', 'LIKE', "%{$search}%");
         });
     }
+
+    // Scopes pour optimiser les requêtes
+    public function scopeActifs($query)
+    {
+        return $query->where('active', true);
+    }
+
+    public function scopePourFormulaires($query)
+    {
+        return $query->select('id', 'nom', 'email')
+            ->where('active', true)
+            ->orderBy('nom');
+    }
 }

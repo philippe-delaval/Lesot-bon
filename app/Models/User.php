@@ -61,4 +61,17 @@ class User extends Authenticatable
     {
         return $this->hasOne(Technicien::class);
     }
+
+    // Scopes pour optimiser les requêtes
+    public function scopeActifs($query)
+    {
+        return $query->where('active', true);
+    }
+
+    public function scopePourFormulaires($query)
+    {
+        return $query->select('id', 'name', 'email')
+            ->where('active', true)
+            ->orderBy('name');
+    }
 }
