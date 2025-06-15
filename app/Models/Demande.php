@@ -86,11 +86,10 @@ class Demande extends Model
     public function getPrioriteColorAttribute(): string
     {
         return match ($this->priorite) {
-            'basse' => 'bg-gray-100 text-gray-600',
-            'normale' => 'bg-blue-100 text-blue-600',
-            'haute' => 'bg-orange-100 text-orange-600',
-            'urgente' => 'bg-red-100 text-red-600',
-            default => 'bg-gray-100 text-gray-600',
+            'normale' => 'bg-green-100 text-green-800 border-green-200',
+            'haute' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            'urgente' => 'bg-red-100 text-red-800 border-red-200',
+            default => 'bg-green-100 text-green-800 border-green-200',
         };
     }
 

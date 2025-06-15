@@ -21,7 +21,7 @@ class DemandeFactory extends Factory
         return [
             'titre' => $this->faker->sentence(6),
             'description' => $this->faker->paragraph(3),
-            'priorite' => $this->faker->randomElement(['basse', 'normale', 'haute', 'urgente']),
+            'priorite' => $this->faker->randomElement(['normale', 'haute', 'urgente']),
             'statut' => $this->faker->randomElement(['en_attente', 'assignee', 'en_cours', 'terminee']),
             'createur_id' => User::factory(),
             'receveur_id' => null,

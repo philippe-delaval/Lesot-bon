@@ -164,4 +164,97 @@
     body {
         @apply bg-background text-foreground;
     }
+    
+    /* Curseur pointer pour tous les éléments cliquables */
+    button,
+    a,
+    [role="button"],
+    [role="link"],
+    [tabindex]:not([tabindex="-1"]),
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"],
+    input[type="checkbox"],
+    input[type="radio"],
+    select,
+    .cursor-pointer,
+    [onclick],
+    [data-clickable],
+    summary {
+        @apply cursor-pointer;
+    }
+    
+    /* Exception pour les éléments désactivés */
+    button:disabled,
+    input:disabled,
+    select:disabled,
+    textarea:disabled,
+    [disabled],
+    [aria-disabled="true"] {
+        @apply cursor-not-allowed;
+    }
+    
+    /* Alignement numérique parfait pour les statistiques */
+    .tabular-nums {
+        font-feature-settings: "tnum" 1;
+        font-variant-numeric: tabular-nums;
+    }
+    
+    /* Container responsive mobile-first */
+    .container-responsive {
+        @apply px-4 md:px-6 lg:px-8 xl:px-12 py-6 md:py-8;
+    }
+    
+    /* Grilles responsive pour dashboard */
+    .stats-grid {
+        @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6;
+    }
+    
+    .sections-grid {
+        @apply grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8;
+    }
+    
+    .stats-details-grid {
+        @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6;
+    }
+    
+    /* Chiffres statistiques responsive */
+    .stats-number {
+        @apply text-3xl md:text-4xl font-bold tabular-nums leading-none;
+    }
+    
+    /* Responsive breakpoints personnalisés */
+    @media (max-width: 374px) {
+        .stats-grid {
+            @apply gap-3;
+        }
+        
+        .container-responsive {
+            @apply px-3 py-4;
+        }
+    }
+    
+    /* Amélioration pour tablettes */
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .stats-grid {
+            @apply grid-cols-2;
+        }
+        
+        .sections-grid {
+            @apply grid-cols-1 gap-6;
+        }
+    }
+    
+    /* Optimisation pour grands écrans */
+    @media (min-width: 1536px) {
+        .container-responsive {
+            @apply px-16 py-10;
+        }
+        
+        .stats-grid,
+        .sections-grid,
+        .stats-details-grid {
+            @apply gap-8;
+        }
+    }
 }

@@ -7,7 +7,7 @@ export interface Demande {
   numero_demande: string;
   titre: string;
   description: string;
-  priorite: 'basse' | 'normale' | 'haute' | 'urgente';
+  priorite: 'normale' | 'haute' | 'urgente';
   statut: 'en_attente' | 'assignee' | 'en_cours' | 'terminee' | 'annulee';
   createur_id: number;
   receveur_id: number | null;
@@ -36,7 +36,7 @@ export interface Demande {
 export interface DemandeForm {
   titre: string;
   description: string;
-  priorite: 'basse' | 'normale' | 'haute' | 'urgente';
+  priorite: 'normale' | 'haute' | 'urgente';
   client_id?: number;
   lieu_intervention?: string;
   date_souhaite_intervention?: string;
@@ -46,7 +46,7 @@ export interface DemandeForm {
 export interface DemandeFilters {
   role?: 'all' | 'assignees' | 'creees';
   statut?: 'all' | 'en_attente' | 'assignee' | 'en_cours' | 'terminee' | 'annulee';
-  priorite?: 'all' | 'basse' | 'normale' | 'haute' | 'urgente';
+  priorite?: 'all' | 'normale' | 'haute' | 'urgente';
   search?: string;
 }
 
@@ -66,7 +66,6 @@ export interface CompleteDemandeRequest {
 }
 
 export const PrioriteLabels = {
-  basse: 'Basse',
   normale: 'Normale',
   haute: 'Haute',
   urgente: 'Urgente',
@@ -81,10 +80,9 @@ export const StatutLabels = {
 } as const;
 
 export const PrioriteColors = {
-  basse: 'bg-gray-100 text-gray-600',
-  normale: 'bg-blue-100 text-blue-600',
-  haute: 'bg-orange-100 text-orange-600',
-  urgente: 'bg-red-100 text-red-600',
+  normale: 'bg-green-100 text-green-800 border-green-200',
+  haute: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  urgente: 'bg-red-100 text-red-800 border-red-200',
 } as const;
 
 export const StatutColors = {

@@ -16,7 +16,7 @@ class UpdateDemandeRequest extends FormRequest
         return [
             'titre' => 'required|string|max:255',
             'description' => 'required|string',
-            'priorite' => 'required|in:basse,normale,haute,urgente',
+            'priorite' => 'required|in:normale,haute,urgente',
             'statut' => 'required|in:en_attente,assignee,en_cours,terminee,annulee',
             'client_id' => 'nullable|exists:clients,id',
             'lieu_intervention' => 'nullable|string|max:255',
@@ -33,7 +33,7 @@ class UpdateDemandeRequest extends FormRequest
             'titre.max' => 'Le titre ne peut pas dépasser 255 caractères.',
             'description.required' => 'La description est requise.',
             'priorite.required' => 'La priorité est requise.',
-            'priorite.in' => 'La priorité doit être: basse, normale, haute ou urgente.',
+            'priorite.in' => 'La priorité doit être: normale, haute ou urgente.',
             'statut.required' => 'Le statut est requis.',
             'statut.in' => 'Le statut doit être: en_attente, assignee, en_cours, terminee ou annulee.',
             'client_id.exists' => 'Le client sélectionné n\'existe pas.',

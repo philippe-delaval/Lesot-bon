@@ -15,10 +15,14 @@ const delegatedProps = computed(() => {
   const { ...delegated } = props;
   return delegated;
 });
+
+const handleUpdateModelValue = (value: any) => {
+  emits('update:modelValue', value);
+};
 </script>
 
 <template>
-  <SelectRoot v-bind="delegatedProps" v-on="emits">
+  <SelectRoot v-bind="delegatedProps" @update:model-value="handleUpdateModelValue">
     <slot />
   </SelectRoot>
 </template>

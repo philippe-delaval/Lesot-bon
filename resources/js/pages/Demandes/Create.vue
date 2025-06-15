@@ -35,6 +35,7 @@ const form = useForm<DemandeForm>({
   receveur_id: undefined,
 });
 
+
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Demandes', href: route('demandes.index') },
@@ -55,7 +56,7 @@ const submit = () => {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <!-- Container responsive optimisé -->
-    <div class="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
+    <div class="container-responsive max-w-4xl mx-auto">
       <div class="space-y-4 md:space-y-6">
         <Heading title="Nouvelle demande d'intervention">
           <template #description>
@@ -86,17 +87,18 @@ const submit = () => {
                 <!-- Priorité -->
                 <div class="space-y-2">
                   <Label for="priorite">Priorité *</Label>
-                  <Select v-model="form.priorite">
-                    <SelectTrigger :class="{ 'border-red-500': form.errors.priorite }">
-                      <SelectValue placeholder="Sélectionner une priorité" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="basse">Basse</SelectItem>
-                      <SelectItem value="normale">Normale</SelectItem>
-                      <SelectItem value="haute">Haute</SelectItem>
-                      <SelectItem value="urgente">Urgente</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    v-model="form.priorite"
+                    :class="[
+                      'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+                      { 'border-red-500': form.errors.priorite }
+                    ]"
+                  >
+                    <option value="">Sélectionner une priorité</option>
+                    <option value="normale">Normale</option>
+                    <option value="haute">Haute</option>
+                    <option value="urgente">Urgente</option>
+                  </select>
                   <InputError :message="form.errors.priorite" />
                 </div>
               </div>
@@ -108,7 +110,7 @@ const submit = () => {
                   id="description"
                   v-model="form.description"
                   placeholder="Description détaillée de l'intervention demandée"
-                  rows="4"
+                  :rows="4"
                   :class="{ 'border-red-500': form.errors.description }"
                 />
                 <InputError :message="form.errors.description" />
@@ -119,20 +121,19 @@ const submit = () => {
                 <!-- Client -->
                 <div class="space-y-2">
                   <Label for="client">Client</Label>
-                  <Select v-model="form.client_id">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un client (optionnel)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="client in clients"
-                        :key="client.id"
-                        :value="client.id.toString()"
-                      >
-                        {{ client.nom }} - {{ client.email }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    v-model="form.client_id"
+                    class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="">Sélectionner un client (optionnel)</option>
+                    <option
+                      v-for="client in clients"
+                      :key="client.id"
+                      :value="client.id"
+                    >
+                      {{ client.nom }} - {{ client.email }}
+                    </option>
+                  </select>
                   <InputError :message="form.errors.client_id" />
                 </div>
 
@@ -142,8 +143,8 @@ const submit = () => {
                   <Input
                     id="date_souhaite_intervention"
                     v-model="form.date_souhaite_intervention"
-                    type="datetime-local"
-                    :min="new Date().toISOString().slice(0, 16)"
+                    type="date"
+                    :min="new Date().toISOString().slice(0, 10)"
                   />
                   <InputError :message="form.errors.date_souhaite_intervention" />
                 </div>
@@ -163,20 +164,19 @@ const submit = () => {
               <!-- Assignation directe (pleine largeur) -->
               <div class="space-y-2">
                 <Label for="receveur">Assigner directement à</Label>
-                <Select v-model="form.receveur_id">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Laisser vide pour assignation ultérieure" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="user in users"
-                      :key="user.id"
-                      :value="user.id.toString()"
-                    >
-                      {{ user.name }} - {{ user.email }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  v-model="form.receveur_id"
+                  class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Laisser vide pour assignation ultérieure</option>
+                  <option
+                    v-for="user in users"
+                    :key="user.id"
+                    :value="user.id"
+                  >
+                    {{ user.name }} - {{ user.email }}
+                  </option>
+                </select>
                 <InputError :message="form.errors.receveur_id" />
               </div>
 

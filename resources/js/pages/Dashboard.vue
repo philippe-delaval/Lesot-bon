@@ -44,8 +44,8 @@ const formatDate = (date: string) => {
     <Head title="Dashboard" />
     
     <!-- Container responsive avec marges mobile-first -->
-    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 xl:px-12 py-4 md:py-6 lg:py-8">
-      <div class="space-y-4 md:space-y-6 lg:space-y-8">
+    <div class="container-responsive max-w-7xl mx-auto">
+      <div class="space-y-6 md:space-y-8 lg:space-y-10">
         <Heading title="Vue d'ensemble">
           <template #description>
             Suivez l'activité de vos demandes et attachements
@@ -53,7 +53,7 @@ const formatDate = (date: string) => {
         </Heading>
 
         <!-- Statistiques principales -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+        <div class="stats-grid">
         <!-- Demandes en attente -->
         <Card>
           <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -61,7 +61,7 @@ const formatDate = (date: string) => {
             <ClipboardList class="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div class="text-2xl font-bold text-yellow-600">{{ demandes.en_attente }}</div>
+            <div class="text-2xl font-bold text-yellow-600 tabular-nums leading-none align-baseline min-h-[2rem] flex items-baseline">{{ demandes.en_attente }}</div>
             <p class="text-xs text-muted-foreground">
               Demandes non assignées
             </p>
@@ -71,13 +71,13 @@ const formatDate = (date: string) => {
         <!-- Mes demandes assignées -->
         <Card>
           <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle class="text-sm font-medium">Mes assignées</CardTitle>
+            <CardTitle class="text-sm font-medium">Assignées</CardTitle>
             <Users class="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div class="text-2xl font-bold text-blue-600">{{ demandes.mes_assignees }}</div>
+            <div class="text-2xl font-bold text-blue-600 tabular-nums leading-none align-baseline min-h-[2rem] flex items-baseline">{{ demandes.mes_assignees }}</div>
             <p class="text-xs text-muted-foreground">
-              Demandes qui me sont assignées
+              Qui me sont assignées
             </p>
           </CardContent>
         </Card>
@@ -85,13 +85,13 @@ const formatDate = (date: string) => {
         <!-- Mes demandes créées -->
         <Card>
           <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle class="text-sm font-medium">Mes créées</CardTitle>
+            <CardTitle class="text-sm font-medium">Créées</CardTitle>
             <TrendingUp class="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div class="text-2xl font-bold text-green-600">{{ demandes.mes_creees }}</div>
+            <div class="text-2xl font-bold text-green-600 tabular-nums leading-none align-baseline min-h-[2rem] flex items-baseline">{{ demandes.mes_creees }}</div>
             <p class="text-xs text-muted-foreground">
-              Demandes en cours que j'ai créées
+              Que j'ai créées
             </p>
           </CardContent>
         </Card>
@@ -103,7 +103,7 @@ const formatDate = (date: string) => {
             <FileText class="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div class="text-2xl font-bold">{{ attachements.month }}</div>
+            <div class="text-2xl font-bold tabular-nums leading-none align-baseline min-h-[2rem] flex items-baseline">{{ attachements.month }}</div>
             <p class="text-xs text-muted-foreground">
               Ce mois-ci
             </p>
@@ -111,7 +111,7 @@ const formatDate = (date: string) => {
         </Card>
       </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
+        <div class="sections-grid">
         <!-- Demandes urgentes -->
         <Card>
           <CardHeader class="flex flex-row items-center justify-between">
@@ -119,7 +119,7 @@ const formatDate = (date: string) => {
               <AlertTriangle class="h-5 w-5 text-red-500" />
               Demandes urgentes
             </CardTitle>
-            <Button variant="outline" size="sm" as="link" :href="route('demandes.index', { priorite: 'urgente' })">
+            <Button variant="outline" size="sm" @click="() => $inertia.visit(route('demandes.index', { priorite: 'urgente' }))">
               Voir toutes
             </Button>
           </CardHeader>
@@ -128,16 +128,16 @@ const formatDate = (date: string) => {
               <div 
                 v-for="demande in demandes_urgentes" 
                 :key="demande.id"
-                class="flex items-center justify-between p-3 md:p-4 bg-red-50 rounded-lg border border-red-200"
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 md:p-5 bg-red-50 rounded-lg border border-red-200 gap-3 sm:gap-4"
               >
                 <div class="flex-1">
                   <Link 
                     :href="route('demandes.show', demande.id)"
-                    class="font-medium text-sm hover:underline"
+                    class="font-medium text-sm md:text-base hover:underline block"
                   >
                     {{ demande.titre }}
                   </Link>
-                  <div class="flex items-center gap-2 mt-1">
+                  <div class="flex flex-wrap items-center gap-2 mt-2">
                     <StatutBadge :statut="demande.statut" />
                     <span class="text-xs text-gray-500">{{ formatDate(demande.created_at) }}</span>
                   </div>
@@ -158,7 +158,7 @@ const formatDate = (date: string) => {
               <Clock class="h-5 w-5 text-blue-500" />
               Demandes récentes
             </CardTitle>
-            <Button variant="outline" size="sm" as="link" :href="route('demandes.index')">
+            <Button variant="outline" size="sm" @click="() => $inertia.visit(route('demandes.index'))">
               Voir toutes
             </Button>
           </CardHeader>
@@ -167,16 +167,16 @@ const formatDate = (date: string) => {
               <div 
                 v-for="demande in demandes_recentes" 
                 :key="demande.id"
-                class="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg"
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 md:p-5 bg-gray-50 rounded-lg gap-3 sm:gap-4"
               >
                 <div class="flex-1">
                   <Link 
                     :href="route('demandes.show', demande.id)"
-                    class="font-medium text-sm hover:underline"
+                    class="font-medium text-sm md:text-base hover:underline block"
                   >
                     {{ demande.titre }}
                   </Link>
-                  <div class="flex items-center gap-2 mt-1">
+                  <div class="flex flex-wrap items-center gap-2 mt-2">
                     <StatutBadge :statut="demande.statut" />
                     <PrioriteBadge :priorite="demande.priorite" />
                     <span class="text-xs text-gray-500">{{ formatDate(demande.created_at) }}</span>
@@ -193,28 +193,28 @@ const formatDate = (date: string) => {
       </div>
 
         <!-- Statistiques détaillées -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
+        <div class="stats-details-grid">
         <!-- Stats demandes -->
         <Card>
           <CardHeader>
             <CardTitle class="text-base">Demandes</CardTitle>
           </CardHeader>
-          <CardContent class="space-y-2">
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Aujourd'hui</span>
-              <span class="font-medium">{{ demandes.today }}</span>
+          <CardContent class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-sm md:text-base text-gray-600">Aujourd'hui</span>
+              <span class="font-medium tabular-nums">{{ demandes.today }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Cette semaine</span>
-              <span class="font-medium">{{ demandes.week }}</span>
+            <div class="flex justify-between items-center">
+              <span class="text-sm md:text-base text-gray-600">Cette semaine</span>
+              <span class="font-medium tabular-nums">{{ demandes.week }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Ce mois</span>
-              <span class="font-medium">{{ demandes.month }}</span>
+            <div class="flex justify-between items-center">
+              <span class="text-sm md:text-base text-gray-600">Ce mois</span>
+              <span class="font-medium tabular-nums">{{ demandes.month }}</span>
             </div>
-            <div class="flex justify-between border-t pt-2">
-              <span class="text-sm text-gray-600">Total</span>
-              <span class="font-bold">{{ demandes.total }}</span>
+            <div class="flex justify-between items-center border-t pt-3">
+              <span class="text-sm md:text-base text-gray-600 font-medium">Total</span>
+              <span class="font-bold text-lg tabular-nums">{{ demandes.total }}</span>
             </div>
           </CardContent>
         </Card>
@@ -224,22 +224,22 @@ const formatDate = (date: string) => {
           <CardHeader>
             <CardTitle class="text-base">Attachements</CardTitle>
           </CardHeader>
-          <CardContent class="space-y-2">
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Aujourd'hui</span>
-              <span class="font-medium">{{ attachements.today }}</span>
+          <CardContent class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-sm md:text-base text-gray-600">Aujourd'hui</span>
+              <span class="font-medium tabular-nums">{{ attachements.today }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Cette semaine</span>
-              <span class="font-medium">{{ attachements.week }}</span>
+            <div class="flex justify-between items-center">
+              <span class="text-sm md:text-base text-gray-600">Cette semaine</span>
+              <span class="font-medium tabular-nums">{{ attachements.week }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Ce mois</span>
-              <span class="font-medium">{{ attachements.month }}</span>
+            <div class="flex justify-between items-center">
+              <span class="text-sm md:text-base text-gray-600">Ce mois</span>
+              <span class="font-medium tabular-nums">{{ attachements.month }}</span>
             </div>
-            <div class="flex justify-between border-t pt-2">
-              <span class="text-sm text-gray-600">Total</span>
-              <span class="font-bold">{{ attachements.total }}</span>
+            <div class="flex justify-between items-center border-t pt-3">
+              <span class="text-sm md:text-base text-gray-600 font-medium">Total</span>
+              <span class="font-bold text-lg tabular-nums">{{ attachements.total }}</span>
             </div>
           </CardContent>
         </Card>
@@ -250,15 +250,15 @@ const formatDate = (date: string) => {
             <CardTitle class="text-base">Actions rapides</CardTitle>
           </CardHeader>
           <CardContent class="space-y-3">
-            <Button class="w-full justify-start" variant="outline" as="link" :href="route('demandes.create')">
+            <Button class="w-full justify-start" variant="outline" @click="() => $inertia.visit(route('demandes.create'))">
               <ClipboardList class="mr-2 h-4 w-4" />
               Nouvelle demande
             </Button>
-            <Button class="w-full justify-start" variant="outline" as="link" :href="route('attachements.create')">
+            <Button class="w-full justify-start" variant="outline" @click="() => $inertia.visit(route('attachements.create'))">
               <FileText class="mr-2 h-4 w-4" />
               Nouvel attachement
             </Button>
-            <Button class="w-full justify-start" variant="outline" as="link" :href="route('clients.create')">
+            <Button class="w-full justify-start" variant="outline" @click="() => $inertia.visit(route('clients.create'))">
               <Users class="mr-2 h-4 w-4" />
               Nouveau client
             </Button>
